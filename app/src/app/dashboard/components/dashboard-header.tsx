@@ -28,14 +28,14 @@ export function DashboardHeader({ session }: DashboardHeaderProps) {
           
           <div className="flex items-center space-x-4">
             <Avatar>
-              <AvatarImage src={session.user.image || ''} alt={session.user.name} />
+              <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
               <AvatarFallback>
-                {session.user.name?.charAt(0) || 'U'}
+                {session.user?.name?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-gray-900">{session.user.name}</p>
-              <p className="text-xs text-gray-500">{session.user.email}</p>
+              <p className="text-sm font-medium text-gray-900">{session.user?.name}</p>
+              <p className="text-xs text-gray-500">{session.user?.email}</p>
             </div>
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />
