@@ -9,8 +9,32 @@ dev-debug.log
 # Dependency directories
 node_modules/
 
-# Environment variables
+# Environment variables - 민감한 정보 보호
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+app/.env
+app/.env.local
+app/.env.development.local
+app/.env.test.local
+app/.env.production.local
+
+# API Keys 및 Secrets
+**/secrets/
+**/*secret*
+**/*key*
+**/*token*
+config/keys.js
+config/secrets.js
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+app/prisma/dev.db
+app/prisma/*.db
 
 # Editor directories and files
 .idea
@@ -23,3 +47,30 @@ node_modules/
 
 # OS specific
 .DS_Store
+Thumbs.db
+
+# Next.js
+.next/
+out/
+app/.next/
+app/out/
+
+# Build outputs
+dist/
+build/
+app/dist/
+app/build/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
