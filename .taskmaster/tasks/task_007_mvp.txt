@@ -1,0 +1,29 @@
+# Task ID: 7
+# Title: Dashboard Layout and Navigation
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create the main application layout with responsive design and navigation components
+# Details:
+1. Create layout components:
+   - app/layout.tsx for global layout
+   - app/dashboard/layout.tsx for authenticated dashboard layout
+2. Implement navigation components:
+   - Header with logo, user profile, and authentication status
+   - Sidebar with navigation links
+   - Mobile-responsive navigation menu
+3. Create dashboard page structure:
+   - Overview page (main dashboard)
+   - Videos page (video analytics)
+   - Channel page (channel details)
+   - Settings page
+4. Implement responsive design using TailwindCSS:
+   - Mobile-first approach
+   - Breakpoints for tablet and desktop
+   - Collapsible sidebar for smaller screens
+5. Add loading states and transitions
+6. Implement protected routes using middleware
+7. Create error boundary components for graceful error handling
+
+# Test Strategy:
+Test layout responsiveness across different screen sizes (mobile, tablet, desktop). Verify navigation components work correctly and links navigate to the right pages. Test protected routes by attempting to access them without authentication. Verify loading states display correctly during navigation. Test error boundaries by simulating component errors.

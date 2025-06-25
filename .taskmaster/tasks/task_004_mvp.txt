@@ -1,0 +1,84 @@
+# Task ID: 4
+# Title: YouTube Data API Integration
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement integration with YouTube Data API v3 to fetch channel and video data for authenticated users
+# Details:
+1. Set up YouTube Data API v3 credentials in Google Cloud Console
+2. Install Google API client: `npm install googleapis`
+3. Create YouTube API utility in lib/youtube.ts:
+```typescript
+import { google } from 'googleapis';
+import { Session } from 'next-auth';
+
+export async function getYouTubeClient(session: Session) {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET
+  );
+  
+  oauth2Client.setCredentials({
+    access_token: session.accessToken
+  });
+
+  return google.youtube({
+    version: 'v3',
+    auth: oauth2Client
+  });
+}
+
+export async function getChannels(session: Session) {
+  const youtube = await getYouTubeClient(session);
+  const response = await youtube.channels.list({
+    part: ['snippet,contentDetails,statistics'],
+    mine: true
+  });
+  return response.data.items;
+}
+
+export async function getChannelVideos(session: Session, channelId: string) {
+  const youtube = await getYouTubeClient(session);
+  
+  // Get uploads playlist ID
+  const channelResponse = await youtube.channels.list({
+    part: ['contentDetails'],
+    id: [channelId]
+  });
+  
+  const uploadsPlaylistId = channelResponse.data.items?.[0].contentDetails?.relatedPlaylists?.uploads;
+  
+  // Get videos from uploads playlist
+  const videosResponse = await youtube.playlistItems.list({
+    part: ['snippet,contentDetails'],
+    playlistId: uploadsPlaylistId,
+    maxResults: 50
+  });
+  
+  // Get video statistics
+  const videoIds = videosResponse.data.items?.map(item => item.contentDetails?.videoId) || [];
+  
+  const videoStatsResponse = await youtube.videos.list({
+    part: ['statistics'],
+    id: videoIds as string[]
+  });
+  
+  // Combine video data
+  return videosResponse.data.items?.map(video => {
+    const stats = videoStatsResponse.data.items?.find(
+      stat => stat.id === video.contentDetails?.videoId
+    );
+    return {
+      ...video,
+      statistics: stats?.statistics
+    };
+  });
+}
+```
+4. Create API endpoints for fetching YouTube data
+5. Implement rate limiting to avoid hitting YouTube API quotas
+6. Add error handling for API requests
+7. Set up data transformation utilities to format API responses
+
+# Test Strategy:
+Test API integration by creating test routes that fetch channel and video data. Verify correct data retrieval by logging responses. Test error handling by simulating API failures. Verify rate limiting functionality works correctly. Create unit tests for data transformation utilities.

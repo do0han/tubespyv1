@@ -1,0 +1,104 @@
+# Task ID: 6
+# Title: Data Storage and Synchronization
+# Status: pending
+# Dependencies: 4
+# Priority: high
+# Description: Implement functionality to store and update YouTube channel and video data in the database
+# Details:
+1. Create data synchronization service in lib/sync.ts
+2. Implement functions to save channel data to database:
+```typescript
+import prisma from './prisma';
+import { getChannels, getChannelVideos } from './youtube';
+import { Session } from 'next-auth';
+
+export async function syncChannelData(session: Session, channelId: string) {
+  const channels = await getChannels(session);
+  const channel = channels?.find(c => c.id === channelId);
+  
+  if (!channel) {
+    throw new Error('Channel not found');
+  }
+  
+  // Update or create channel in database
+  const updatedChannel = await prisma.channel.upsert({
+    where: { youtube_id: channel.id },
+    update: {
+      name: channel.snippet?.title,
+      subscriber_count: parseInt(channel.statistics?.subscriberCount || '0'),
+      view_count: parseInt(channel.statistics?.viewCount || '0')
+    },
+    create: {
+      youtube_id: channel.id,
+      name: channel.snippet?.title,
+      subscriber_count: parseInt(channel.statistics?.subscriberCount || '0'),
+      view_count: parseInt(channel.statistics?.viewCount || '0'),
+      user: {
+        connect: { id: session.user.id }
+      }
+    }
+  });
+  
+  return updatedChannel;
+}
+
+export async function syncVideoData(session: Session, channelId: string) {
+  const videos = await getChannelVideos(session, channelId);
+  const dbChannel = await prisma.channel.findUnique({
+    where: { youtube_id: channelId }
+  });
+  
+  if (!dbChannel) {
+    throw new Error('Channel not found in database');
+  }
+  
+  // Process videos in batches to avoid overwhelming the database
+  const batchSize = 10;
+  const batches = [];
+  
+  for (let i = 0; i < videos?.length || 0; i += batchSize) {
+    const batch = videos?.slice(i, i + batchSize) || [];
+    batches.push(batch);
+  }
+  
+  const results = [];
+  
+  for (const batch of batches) {
+    const batchResults = await Promise.all(
+      batch.map(async (video) => {
+        return prisma.video.upsert({
+          where: { youtube_id: video.contentDetails?.videoId },
+          update: {
+            title: video.snippet?.title,
+            view_count: parseInt(video.statistics?.viewCount || '0'),
+            like_count: parseInt(video.statistics?.likeCount || '0'),
+            comment_count: parseInt(video.statistics?.commentCount || '0')
+          },
+          create: {
+            youtube_id: video.contentDetails?.videoId,
+            title: video.snippet?.title,
+            published_at: new Date(video.snippet?.publishedAt),
+            view_count: parseInt(video.statistics?.viewCount || '0'),
+            like_count: parseInt(video.statistics?.likeCount || '0'),
+            comment_count: parseInt(video.statistics?.commentCount || '0'),
+            channel: {
+              connect: { id: dbChannel.id }
+            }
+          }
+        });
+      })
+    );
+    
+    results.push(...batchResults);
+  }
+  
+  return results;
+}
+```
+3. Create API endpoints for data synchronization
+4. Implement background refresh mechanism for keeping data up-to-date
+5. Add data validation before storage
+6. Implement error handling and retry logic for failed synchronizations
+
+# Test Strategy:
+Test data storage by syncing a test channel and verifying data is correctly saved to the database. Test data updates by changing channel data and confirming updates are reflected. Test error handling by simulating API failures. Verify data validation correctly handles invalid data. Test performance with larger datasets to ensure efficient processing.

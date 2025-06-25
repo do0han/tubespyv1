@@ -1,0 +1,222 @@
+# TubeSpy - YouTube Analytics & Intelligence Platform
+
+<context>
+# Overview  
+TubeSpy is a comprehensive YouTube analytics and intelligence platform built with Next.js 14, designed to help content creators, marketers, and agencies optimize their YouTube strategy through data-driven insights. The platform leverages YouTube Data API v3 and Google Gemini AI to provide real-time analytics, competitive intelligence, and AI-powered content optimization recommendations.
+
+The platform solves the problem of fragmented YouTube analytics by providing a unified dashboard that combines channel performance metrics, competitor analysis, trend forecasting, and AI-driven optimization suggestions in one place.
+
+Target Users:
+- YouTube content creators seeking growth insights
+- Digital marketing agencies managing multiple channels
+- Businesses using YouTube for brand marketing
+- Social media managers tracking competitive landscape
+
+# Core Features  
+
+## 1. Real-time YouTube Channel Analytics Dashboard
+- **Purpose**: Centralized view of channel performance metrics
+- **Key Metrics**: Subscriber growth, view trends, engagement rates, revenue estimates
+- **AI Enhancement**: Gemini AI provides performance insights and growth predictions
+- **Value**: Eliminates need to navigate multiple YouTube Studio accounts
+
+## 2. AI-Powered Content Optimization
+- **Purpose**: Leverage Gemini AI to optimize video titles, descriptions, and tags
+- **Features**: Title suggestions, SEO optimization, trending keyword integration
+- **AI Analysis**: Content performance prediction based on historical data
+- **Value**: Increase discoverability and engagement through optimized metadata
+
+## 3. Competitive Intelligence & Monitoring
+- **Purpose**: Track competitor channels and identify market opportunities
+- **Features**: Competitor performance comparison, content gap analysis, trend monitoring
+- **AI Insights**: Gemini AI identifies successful competitor strategies
+- **Value**: Stay ahead of competition and discover untapped niches
+
+## 4. Trend Analysis & Forecasting
+- **Purpose**: Predict viral content opportunities and emerging trends
+- **Features**: Trending topics detection, hashtag analysis, optimal posting times
+- **AI Prediction**: Gemini AI forecasts content performance potential
+- **Value**: Create content that aligns with trending topics for maximum reach
+
+## 5. Multi-Channel Management
+- **Purpose**: Manage multiple YouTube channels from single dashboard
+- **Features**: Channel switching, aggregated metrics, cross-channel insights
+- **Team Features**: Role-based access for agencies and teams
+- **Value**: Streamline workflow for users managing multiple properties
+
+# User Experience  
+
+## User Personas
+1. **Solo Content Creator**: Individual YouTuber looking to grow their channel
+2. **Marketing Agency**: Managing multiple client channels
+3. **Brand Manager**: Tracking brand presence and competitors on YouTube
+4. **Social Media Manager**: Multi-platform content strategy including YouTube
+
+## Key User Flows
+1. **Onboarding Flow**: Account setup → Channel connection → Initial analytics setup
+2. **Daily Analytics Flow**: Dashboard overview → Detailed metrics → AI recommendations
+3. **Content Optimization Flow**: Video upload → AI analysis → Optimization suggestions → Implementation
+4. **Competitor Analysis Flow**: Add competitors → Performance comparison → Opportunity identification
+
+## UI/UX Considerations
+- Clean, modern interface with intuitive navigation
+- Responsive design for desktop and mobile access
+- Dark/light theme options for user preference
+- Interactive charts and data visualizations
+- Real-time updates and notifications
+</context>
+
+<PRD>
+# Technical Architecture  
+
+## System Components
+- **Frontend**: Next.js 14 with App Router, React 18, TypeScript
+- **Styling**: TailwindCSS with Shadcn/ui components
+- **State Management**: Zustand for client-side state
+- **Authentication**: NextAuth.js with Google OAuth
+- **Database**: PostgreSQL with Prisma ORM
+- **Caching**: Redis for API response caching
+- **File Storage**: Cloudinary for image/video thumbnails
+
+## Data Models
+- **User**: id, email, name, subscription_plan, created_at
+- **Channel**: id, youtube_id, user_id, name, subscriber_count, analytics_data
+- **Video**: id, youtube_id, channel_id, title, description, metrics, ai_analysis
+- **Competitor**: id, user_id, competitor_channel_id, tracking_metrics
+- **Analytics**: id, entity_id, entity_type, metrics_data, recorded_at
+
+## APIs and Integrations
+- **YouTube Data API v3**: Channel and video data retrieval
+- **Google Gemini API**: AI-powered content analysis and optimization
+- **NextAuth.js**: Authentication and session management
+- **Prisma**: Database ORM and migrations
+- **Vercel Analytics**: Performance monitoring
+
+## Infrastructure Requirements
+- **Hosting**: Vercel for Next.js deployment
+- **Database**: Supabase PostgreSQL instance
+- **Caching**: Vercel Edge Functions with Redis
+- **CDN**: Vercel Edge Network for global performance
+- **Monitoring**: Vercel Analytics + Sentry for error tracking
+
+# Development Roadmap  
+
+## Phase 1: Foundation & MVP (Core Analytics)
+- Project setup with Next.js 14, TypeScript, TailwindCSS
+- Database schema design and Prisma setup
+- Authentication system with NextAuth.js
+- YouTube Data API integration
+- Basic channel analytics dashboard
+- Simple channel connection flow
+- Responsive UI with basic charts
+
+## Phase 2: AI Integration & Content Optimization
+- Google Gemini API integration
+- AI-powered title and description optimization
+- Content performance prediction
+- Trending keywords analysis
+- SEO recommendation engine
+- Enhanced dashboard with AI insights
+
+## Phase 3: Competitive Intelligence
+- Competitor tracking system
+- Performance comparison tools
+- Market opportunity identification
+- Competitive analysis dashboard
+- Trend monitoring and alerts
+- Advanced filtering and search capabilities
+
+## Phase 4: Advanced Features & Scaling
+- Multi-channel management
+- Team collaboration features
+- Advanced analytics and reporting
+- Export functionality (PDF, CSV)
+- API rate limiting and optimization
+- Performance monitoring and scaling
+
+## Phase 5: Enterprise & Monetization
+- Subscription tiers and payment integration
+- White-label solutions for agencies
+- Advanced AI features and custom models
+- Enterprise security and compliance
+- Advanced team management
+- Custom reporting and insights
+
+# Logical Dependency Chain
+
+## Foundation First (Phase 1)
+1. **Project Setup**: Next.js configuration, TypeScript, TailwindCSS
+2. **Database Design**: Prisma schema, migrations, seed data
+3. **Authentication**: NextAuth.js setup with Google OAuth
+4. **YouTube API Integration**: Basic data fetching and error handling
+5. **Basic Dashboard**: Channel overview, simple metrics display
+6. **Channel Connection**: OAuth flow for YouTube channel access
+
+## Usable Frontend Early (Phase 1 continued)
+7. **Responsive UI**: Mobile-first design with chart components
+8. **Real-time Updates**: WebSocket or polling for live data
+9. **Basic Analytics**: Views, subscribers, engagement metrics
+10. **Error Handling**: Graceful API failures and user feedback
+
+## AI Enhancement (Phase 2)
+11. **Gemini Integration**: API setup and prompt engineering
+12. **Content Analysis**: AI-powered video metadata analysis
+13. **Optimization Suggestions**: AI recommendations interface
+14. **Performance Prediction**: ML-based content success forecasting
+
+## Competitive Features (Phase 3)
+15. **Competitor Tracking**: Add/remove competitors, data collection
+16. **Comparison Tools**: Side-by-side performance metrics
+17. **Market Analysis**: Trend identification and opportunity discovery
+18. **Advanced Search**: Filtering, sorting, and discovery features
+
+# Risks and Mitigations  
+
+## Technical Challenges
+- **YouTube API Rate Limits**: Implement intelligent caching and request batching
+- **Gemini API Costs**: Optimize prompts and implement request quotas
+- **Real-time Data**: Use efficient polling strategies and WebSocket connections
+- **Database Performance**: Implement proper indexing and query optimization
+
+## MVP Scope Management
+- **Feature Creep**: Focus on core analytics first, defer advanced features
+- **API Complexity**: Start with basic YouTube data, expand gradually
+- **UI Complexity**: Use component library (Shadcn/ui) for consistency
+- **Authentication**: Leverage NextAuth.js to avoid custom implementation
+
+## Resource Constraints
+- **Development Time**: Prioritize features based on user value
+- **API Costs**: Implement caching strategies and usage monitoring
+- **Scalability**: Design for growth but avoid premature optimization
+- **Maintenance**: Choose stable, well-documented technologies
+
+# Appendix  
+
+## Research Findings
+- YouTube Data API v3 provides comprehensive channel and video metrics
+- Gemini AI excels at content analysis and optimization suggestions
+- Competitive landscape includes TubeBuddy, VidIQ, and Tubelytics
+- Next.js 14 App Router provides excellent performance and developer experience
+
+## Technical Specifications
+- **Frontend**: Next.js 14.2+, React 18, TypeScript 5.0+
+- **UI Library**: Shadcn/ui with Radix UI primitives
+- **Charts**: Recharts for data visualization
+- **Database**: PostgreSQL 15+ with Prisma 5.0+
+- **Authentication**: NextAuth.js 4.0+ with Google provider
+- **APIs**: YouTube Data API v3, Google Gemini API
+- **Deployment**: Vercel with Edge Functions
+
+## Success Metrics
+- **User Engagement**: Daily active users, session duration
+- **Feature Adoption**: AI suggestion usage, competitor tracking usage
+- **Performance**: Page load times, API response times
+- **Business**: User retention, conversion to paid plans
+- **Technical**: API success rates, error rates, uptime
+
+## Compliance & Security
+- **Data Privacy**: GDPR compliance for user data
+- **API Security**: Secure API key management
+- **Authentication**: OAuth 2.0 with JWT tokens
+- **Database**: Encrypted data at rest and in transit
+</PRD> 

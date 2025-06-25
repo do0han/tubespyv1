@@ -1,0 +1,89 @@
+# Task ID: 9
+# Title: Video Analytics Implementation
+# Status: pending
+# Dependencies: 6, 7
+# Priority: medium
+# Description: Develop the video analytics section with list and detail views for individual video performance
+# Details:
+1. Create video list page in app/dashboard/videos/page.tsx:
+   - Table/grid view of videos with key metrics
+   - Sorting and filtering options
+   - Pagination for large video collections
+2. Implement video detail page in app/dashboard/videos/[id]/page.tsx:
+   - Video metadata display
+   - Performance metrics visualization
+   - Engagement statistics
+3. Create video analytics components:
+   - VideoCard for list view
+   - VideoMetrics for detailed statistics
+   - VideoPerformanceChart for performance visualization
+   - VideoComparison for comparing with channel average
+4. Implement data fetching for video analytics:
+```typescript
+// app/dashboard/videos/page.tsx
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { VideoList, VideoFilters } from '@/components/videos';
+
+export default async function VideosPage({ searchParams }) {
+  const session = await getServerSession();
+  
+  if (!session) {
+    redirect('/auth/signin');
+  }
+  
+  const { sort = 'published_at', order = 'desc', page = '1' } = searchParams;
+  const pageSize = 10;
+  const pageNumber = parseInt(page);
+  
+  const channels = await prisma.channel.findMany({
+    where: {
+      user: { id: session.user.id }
+    },
+    take: 1
+  });
+  
+  const channel = channels[0];
+  
+  if (!channel) {
+    redirect('/channels/connect');
+  }
+  
+  const videos = await prisma.video.findMany({
+    where: {
+      channel_id: channel.id
+    },
+    orderBy: {
+      [sort]: order
+    },
+    skip: (pageNumber - 1) * pageSize,
+    take: pageSize
+  });
+  
+  const totalVideos = await prisma.video.count({
+    where: {
+      channel_id: channel.id
+    }
+  });
+  
+  const totalPages = Math.ceil(totalVideos / pageSize);
+  
+  return (
+    <div className="p-4 space-y-6">
+      <h1 className="text-2xl font-bold">Video Analytics</h1>
+      
+      <VideoFilters currentSort={sort} currentOrder={order} />
+      
+      <VideoList videos={videos} />
+      
+      <Pagination currentPage={pageNumber} totalPages={totalPages} />
+    </div>
+  );
+}
+```
+5. Create video detail page with performance metrics
+6. Implement video comparison functionality
+7. Add data export options (CSV)
+
+# Test Strategy:
+Test video list page with sample data to verify sorting, filtering, and pagination. Test video detail page to ensure metrics display correctly. Verify responsive design for both list and detail views. Test data fetching with real YouTube data. Test video comparison functionality with different videos. Verify data export generates correct CSV files.

@@ -1,0 +1,225 @@
+# Task ID: 2
+# Title: Design and Implement Simplified Database Schema with Prisma for MVP
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Create and implement a simplified database schema using Prisma ORM for the MVP, focusing only on User, Channel, and Video models with their essential relationships.
+# Details:
+1. Analyze the MVP requirements to determine essential fields for each model:
+
+**User Model**:
+- Basic user information (id, name, email)
+- Authentication details (OAuth identifiers)
+- Timestamps for user creation and updates
+
+**Channel Model**:
+- Channel identifiers (id, YouTube channel ID)
+- Basic channel metadata (title, description, thumbnail URL)
+- Performance metrics (subscriber count, view count)
+- Relationship to User model
+- Timestamps for data creation and updates
+
+**Video Model**:
+- Video identifiers (id, YouTube video ID)
+- Basic video metadata (title, description, thumbnail URL)
+- Performance metrics (view count, like count, comment count)
+- Relationship to Channel model
+- Timestamps for data creation and updates
+
+2. Create the Prisma schema in `prisma/schema.prisma`:
+```prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  image         String?
+  googleId      String?   @unique
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  channels      Channel[]
+
+  @@map("users")
+}
+
+model Channel {
+  id              String    @id @default(cuid())
+  youtubeId       String    @unique @map("youtube_id")
+  title           String
+  description     String?
+  thumbnailUrl    String?   @map("thumbnail_url")
+  subscriberCount Int?      @map("subscriber_count")
+  viewCount       Int?      @map("view_count")
+  videoCount      Int?      @map("video_count")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videos          Video[]
+
+  @@map("channels")
+}
+
+model Video {
+  id              String    @id @default(cuid())
+  youtubeId       String    @unique @map("youtube_id")
+  title           String
+  description     String?
+  thumbnailUrl    String?   @map("thumbnail_url")
+  publishedAt     DateTime? @map("published_at")
+  viewCount       Int?      @map("view_count")
+  likeCount       Int?      @map("like_count")
+  commentCount    Int?      @map("comment_count")
+  duration        String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  channelId       String    @map("channel_id")
+  channel         Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@map("videos")
+}
+```
+
+3. Create a Prisma client instance in `lib/prisma.ts`:
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma = globalForPrisma.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export default prisma;
+```
+
+4. Generate Prisma client:
+```bash
+npx prisma generate
+```
+
+5. Create initial migration:
+```bash
+npx prisma migrate dev --name init
+```
+
+6. Create database seed script (optional) in `prisma/seed.ts`:
+```typescript
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+async function main() {
+  // Create test user
+  const user = await prisma.user.upsert({
+    where: { email: 'test@example.com' },
+    update: {},
+    create: {
+      email: 'test@example.com',
+      name: 'Test User',
+      googleId: 'test123',
+    },
+  });
+
+  // Create test channel
+  const channel = await prisma.channel.upsert({
+    where: { youtubeId: 'UC_test_channel' },
+    update: {},
+    create: {
+      youtubeId: 'UC_test_channel',
+      title: 'Test Channel',
+      description: 'A test YouTube channel',
+      thumbnailUrl: 'https://example.com/thumbnail.jpg',
+      subscriberCount: 1000,
+      viewCount: 50000,
+      videoCount: 25,
+      userId: user.id,
+    },
+  });
+
+  // Create test video
+  await prisma.video.upsert({
+    where: { youtubeId: 'test_video_id' },
+    update: {},
+    create: {
+      youtubeId: 'test_video_id',
+      title: 'Test Video',
+      description: 'A test YouTube video',
+      thumbnailUrl: 'https://example.com/video-thumbnail.jpg',
+      publishedAt: new Date(),
+      viewCount: 1500,
+      likeCount: 100,
+      commentCount: 25,
+      duration: 'PT10M30S',
+      channelId: channel.id,
+    },
+  });
+
+  console.log('Database seeded successfully');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+7. Update package.json to include seed script:
+```json
+"prisma": {
+  "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+}
+```
+
+8. Document the schema design decisions and relationships for the development team.
+
+# Test Strategy:
+1. Verify schema integrity:
+   - Run `npx prisma validate` to ensure the schema is valid
+   - Check for any warnings or errors in the schema definition
+
+2. Test database migrations:
+   - Run `npx prisma migrate dev` to apply migrations to development database
+   - Verify that all tables are created with correct columns and relationships
+   - Check constraints and indexes are properly applied
+
+3. Test Prisma client generation:
+   - Run `npx prisma generate` to create the Prisma client
+   - Verify that TypeScript types are correctly generated
+   - Import the client in a test file to check for any import errors
+
+4. Test basic CRUD operations:
+   - Create a test script that performs Create, Read, Update, and Delete operations on each model
+   - Verify relationships work correctly (e.g., creating a video associated with a channel)
+   - Test cascade deletions (e.g., deleting a user should delete associated channels)
+
+5. Test data validation:
+   - Attempt to create records with invalid data to ensure constraints are enforced
+   - Test unique constraints on email and YouTube IDs
+   - Verify required fields cannot be null
+
+6. Run database seed script:
+   - Execute `npx prisma db seed` to populate test data
+   - Verify all test records are created with correct relationships
+
+7. Test integration with NextAuth:
+   - Verify the User model works correctly with NextAuth.js adapter
+   - Test user creation during OAuth authentication flow
+
+8. Test integration with YouTube API data:
+   - Create a test script that fetches sample YouTube data and stores it using the schema
+   - Verify all relevant fields from the API can be mapped to the database schema

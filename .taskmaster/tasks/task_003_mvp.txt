@@ -1,0 +1,222 @@
+# Task ID: 3
+# Title: Implement NextAuth.js Authentication with Google OAuth for YouTube Channel Access
+# Status: pending
+# Dependencies: 1, 2
+# Priority: high
+# Description: Set up NextAuth.js with Google OAuth provider, configuring the necessary scopes for YouTube Data API access to allow users to authenticate and access their YouTube channel data.
+# Details:
+1. Install required packages:
+```bash
+npm install next-auth@latest @auth/prisma-adapter
+```
+
+2. Configure environment variables in `.env.local`:
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_generated_secret_here
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+3. Create NextAuth API route in `app/api/auth/[...nextauth]/route.ts`:
+```typescript
+import NextAuth from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import prisma from '@/lib/prisma';
+
+export const authOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: 'openid email profile https://www.googleapis.com/auth/youtube.readonly',
+          prompt: 'consent',
+          access_type: 'offline',
+        },
+      },
+    }),
+  ],
+  callbacks: {
+    async session({ session, user, token }) {
+      // Add user ID to session
+      if (session.user) {
+        session.user.id = user.id;
+      }
+      
+      // Add access token to session for YouTube API calls
+      if (token?.accessToken) {
+        session.accessToken = token.accessToken;
+      }
+      
+      return session;
+    },
+    async jwt({ token, account }) {
+      // Persist the OAuth access_token to the token right after sign in
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.expiresAt = account.expires_at;
+      }
+      return token;
+    },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+  },
+};
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
+```
+
+4. Create a session provider in `app/providers.tsx`:
+```typescript
+'use client';
+
+import { SessionProvider } from 'next-auth/react';
+
+export function Providers({ children }) {
+  return <SessionProvider>{children}</SessionProvider>;
+}
+```
+
+5. Add the provider to the root layout in `app/layout.tsx`:
+```typescript
+import { Providers } from './providers';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+6. Create login page in `app/login/page.tsx`:
+```typescript
+'use client';
+
+import { signIn } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-md space-y-8 p-10 rounded-xl shadow-lg">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold">Welcome to TubeSpy</h1>
+          <p className="mt-2 text-gray-600">Sign in to access your YouTube analytics</p>
+        </div>
+        <Button 
+          className="w-full" 
+          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+        >
+          Sign in with Google
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+7. Create a utility to check authentication in `lib/auth.ts`:
+```typescript
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+
+export async function getSession() {
+  return await getServerSession(authOptions);
+}
+
+export async function requireAuth() {
+  const session = await getSession();
+  
+  if (!session) {
+    redirect('/login');
+  }
+  
+  return session;
+}
+```
+
+8. Update TypeScript types for NextAuth in `types/next-auth.d.ts`:
+```typescript
+import NextAuth from 'next-auth';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      image?: string;
+    };
+    accessToken?: string;
+  }
+}
+```
+
+9. Create a protected route example in `app/dashboard/page.tsx`:
+```typescript
+import { requireAuth } from '@/lib/auth';
+
+export default async function DashboardPage() {
+  const session = await requireAuth();
+  
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Welcome, {session.user.name}</p>
+    </div>
+  );
+}
+```
+
+# Test Strategy:
+1. Test the authentication flow:
+   - Verify the login page renders correctly
+   - Test the Google sign-in button functionality
+   - Confirm successful redirection after authentication
+   - Verify failed authentication scenarios display appropriate error messages
+
+2. Test OAuth scopes and permissions:
+   - Confirm the consent screen shows YouTube access permissions
+   - Verify the application requests the correct scopes
+   - Test that access tokens are properly stored in the session
+
+3. Test session management:
+   - Verify session persistence across page refreshes
+   - Test session expiration and token refresh functionality
+   - Confirm user information is correctly stored in the session
+
+4. Test protected routes:
+   - Verify unauthenticated users are redirected to login
+   - Confirm authenticated users can access protected routes
+   - Test that user-specific data is properly displayed
+
+5. Test database integration:
+   - Verify user data is correctly stored in the database after authentication
+   - Test that existing users can sign in without creating duplicate records
+   - Confirm user relationships with other models work correctly
+
+6. Test error handling:
+   - Simulate authentication failures and verify error handling
+   - Test invalid or expired tokens scenarios
+   - Verify proper error messages are displayed to users
+
+7. Create integration tests:
+   - Write tests that simulate the complete authentication flow
+   - Test the integration between NextAuth and the YouTube Data API
+   - Verify that authenticated users can access their YouTube channel data

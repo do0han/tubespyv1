@@ -1,0 +1,81 @@
+# Task ID: 8
+# Title: Channel Analytics Dashboard
+# Status: pending
+# Dependencies: 6, 7
+# Priority: high
+# Description: Develop the main analytics dashboard displaying channel performance metrics and trends
+# Details:
+1. Create dashboard components:
+   - MetricCard for displaying key statistics
+   - ChannelOverview for channel summary
+   - SubscriberChart for subscriber growth visualization
+   - ViewsChart for view count trends
+   - EngagementMetrics for engagement rate display
+2. Implement data fetching for dashboard:
+```typescript
+// app/dashboard/page.tsx
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { MetricCard, ChannelOverview, SubscriberChart, ViewsChart, EngagementMetrics } from '@/components/dashboard';
+
+export default async function DashboardPage() {
+  const session = await getServerSession();
+  
+  if (!session) {
+    redirect('/auth/signin');
+  }
+  
+  const channels = await prisma.channel.findMany({
+    where: {
+      user: { id: session.user.id }
+    },
+    include: {
+      videos: {
+        orderBy: { published_at: 'desc' },
+        take: 10
+      }
+    }
+  });
+  
+  const channel = channels[0]; // For MVP, we're focusing on a single channel
+  
+  if (!channel) {
+    redirect('/channels/connect');
+  }
+  
+  // Calculate engagement metrics
+  const totalViews = channel.videos.reduce((sum, video) => sum + video.view_count, 0);
+  const totalLikes = channel.videos.reduce((sum, video) => sum + video.like_count, 0);
+  const totalComments = channel.videos.reduce((sum, video) => sum + video.comment_count, 0);
+  const engagementRate = totalViews > 0 ? ((totalLikes + totalComments) / totalViews) * 100 : 0;
+  
+  return (
+    <div className="p-4 space-y-6">
+      <h1 className="text-2xl font-bold">Channel Dashboard</h1>
+      
+      <ChannelOverview channel={channel} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricCard title="Subscribers" value={channel.subscriber_count} />
+        <MetricCard title="Total Views" value={channel.view_count} />
+        <MetricCard title="Engagement Rate" value={`${engagementRate.toFixed(2)}%`} />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SubscriberChart channelId={channel.id} />
+        <ViewsChart channelId={channel.id} />
+      </div>
+      
+      <EngagementMetrics videos={channel.videos} />
+    </div>
+  );
+}
+```
+3. Create chart components using a charting library (e.g., Chart.js or Recharts)
+4. Implement data transformation utilities for chart data
+5. Add time period selectors (7 days, 30 days, etc.)
+6. Create loading and error states for data fetching
+7. Implement data refresh functionality
+
+# Test Strategy:
+Test dashboard rendering with sample data to verify layout and components. Test data fetching by connecting a real YouTube channel and verifying metrics display correctly. Test chart components with different data sets to ensure proper visualization. Verify responsive design across different screen sizes. Test time period selectors to ensure data updates correctly.

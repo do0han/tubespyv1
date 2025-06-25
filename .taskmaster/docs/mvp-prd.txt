@@ -1,0 +1,199 @@
+# TubeSpy MVP - Minimum Viable Product
+
+<context>
+# Overview  
+TubeSpy MVP is the initial version focused on delivering core YouTube analytics functionality to validate the product concept and gain early users. The MVP prioritizes essential features that demonstrate value while being achievable within a reasonable development timeframe.
+
+Target Users for MVP:
+- Individual YouTube content creators seeking basic analytics insights
+- Small channel owners wanting to understand their performance
+- Users testing the platform before committing to advanced features
+
+# Core MVP Features  
+
+## 1. User Authentication & Channel Connection
+- **Purpose**: Secure user access and YouTube channel linking
+- **Features**: Google OAuth login, channel selection, basic profile management
+- **Value**: Essential foundation for personalized analytics
+
+## 2. Basic YouTube Analytics Dashboard
+- **Purpose**: Display core channel performance metrics
+- **Key Metrics**: Subscriber count, view counts, recent video performance, engagement rates
+- **Value**: Immediate value proposition - better visualization than YouTube Studio
+
+## 3. Channel Performance Overview
+- **Purpose**: Historical performance tracking and trends
+- **Features**: Chart visualization, basic trend analysis, performance summaries
+- **Value**: Help creators understand their growth trajectory
+
+## 4. Video Analytics
+- **Purpose**: Individual video performance insights
+- **Features**: Video list, basic metrics per video, simple comparison
+- **Value**: Understand which content performs best
+
+## 5. Responsive Web Interface
+- **Purpose**: Accessible across devices
+- **Features**: Mobile-friendly design, intuitive navigation, clean UI
+- **Value**: Modern user experience that's better than existing tools
+
+# User Experience for MVP
+
+## User Personas
+1. **Solo Content Creator**: Individual looking for better analytics than YouTube Studio
+2. **Small Channel Owner**: Creator with basic growth ambitions
+
+## Key User Flows
+1. **Onboarding**: Sign up → Connect Google account → Select YouTube channel → View dashboard
+2. **Daily Use**: Login → Check dashboard → Review recent video performance → Identify trends
+3. **Video Analysis**: Browse video list → Select video → View detailed metrics
+
+## UI/UX Considerations
+- Simple, clean interface with minimal learning curve
+- Focus on data visualization over complex features
+- Fast loading times and responsive design
+- Clear calls-to-action for core functions
+</context>
+
+<PRD>
+# Technical Architecture for MVP
+
+## System Components
+- **Frontend**: Next.js 14 with App Router, React 18, TypeScript
+- **Styling**: TailwindCSS with Shadcn/ui components
+- **Authentication**: NextAuth.js with Google OAuth
+- **Database**: PostgreSQL with Prisma ORM (simplified schema)
+- **Deployment**: Vercel
+
+## Simplified Data Models for MVP
+- **User**: id, email, name, google_id, created_at
+- **Channel**: id, youtube_id, user_id, name, subscriber_count, view_count, updated_at
+- **Video**: id, youtube_id, channel_id, title, published_at, view_count, like_count, comment_count
+
+## APIs and Integrations
+- **YouTube Data API v3**: Core functionality only
+- **NextAuth.js**: Authentication
+- **Prisma**: Database operations
+
+## Infrastructure Requirements
+- **Hosting**: Vercel (free tier initially)
+- **Database**: Supabase free tier
+- **No caching layer initially** (keep it simple)
+
+# Development Roadmap for MVP
+
+## Phase 1: Foundation (Week 1)
+- Project setup with Next.js 14, TypeScript, TailwindCSS
+- Shadcn/ui component library setup
+- Basic project structure and configuration
+
+## Phase 2: Core Backend (Week 2)
+- Database schema design and Prisma setup
+- NextAuth.js authentication with Google OAuth
+- YouTube Data API integration (basic endpoints)
+
+## Phase 3: Basic Frontend (Week 3)
+- Authentication UI (login/logout)
+- Channel connection flow
+- Basic dashboard layout and components
+
+## Phase 4: Analytics Display (Week 4)
+- Channel analytics dashboard
+- Video list and basic video analytics
+- Chart components for data visualization
+
+## Phase 5: Polish & Deploy (Week 5)
+- Error handling and user feedback
+- Responsive design improvements
+- MVP deployment and testing
+
+# Logical Dependency Chain for MVP
+
+## Foundation First
+1. **Project Setup**: Next.js, TypeScript, TailwindCSS, Shadcn/ui
+2. **Database Setup**: Simplified Prisma schema, Supabase connection
+3. **Authentication**: NextAuth.js with Google OAuth
+
+## Core Functionality
+4. **YouTube API Integration**: Basic channel and video data fetching
+5. **Channel Connection**: UI flow for connecting YouTube channels
+6. **Data Storage**: Save channel and video data to database
+
+## User Interface
+7. **Dashboard Layout**: Basic responsive layout with navigation
+8. **Analytics Display**: Charts and metrics visualization
+9. **Video Analytics**: List and detail views for videos
+
+## Finishing Touches
+10. **Error Handling**: Basic error states and user feedback
+11. **Performance**: Basic optimizations and loading states
+12. **Deployment**: Production deployment on Vercel
+
+# MVP Scope Limitations
+
+## What's NOT in MVP
+- AI-powered features (Gemini integration)
+- Real-time updates (WebSockets)
+- Competitor tracking
+- Multi-channel management
+- Team collaboration features
+- Advanced analytics and reporting
+- Subscription/payment features
+- Performance prediction
+- Trend analysis
+- Caching optimization
+
+## Future Enhancements (Post-MVP)
+- All advanced features from main PRD
+- Enhanced UI/UX based on user feedback
+- Performance optimizations
+- Mobile app development
+- Monetization features
+
+# Success Metrics for MVP
+
+## Technical Success
+- **Functionality**: All core features working reliably
+- **Performance**: Page load times under 3 seconds
+- **Reliability**: 99% uptime during testing period
+
+## User Success
+- **User Registration**: Ability to onboard 10+ test users
+- **Core Workflow**: Users can successfully connect channels and view analytics
+- **User Feedback**: Positive feedback on core value proposition
+
+## Business Success
+- **Value Demonstration**: Clear improvement over YouTube Studio analytics
+- **User Retention**: Test users continue using after initial trial
+- **Feedback Collection**: Validation of product concept and feature priorities
+
+# Risks and Mitigations for MVP
+
+## Technical Risks
+- **YouTube API Limits**: Start with conservative usage, implement basic rate limiting
+- **Authentication Issues**: Use well-tested NextAuth.js patterns
+- **Database Performance**: Keep schema simple, add optimization later
+
+## Scope Risks
+- **Feature Creep**: Stick strictly to defined MVP features
+- **Over-Engineering**: Choose simple solutions over complex ones
+- **Timeline Pressure**: Focus on working software over perfect code
+
+## User Risks
+- **Limited Features**: Clearly communicate MVP nature to early users
+- **Feedback Management**: Collect but don't immediately implement all feedback
+- **Expectations**: Set clear expectations about MVP limitations
+
+# Appendix
+
+## MVP Development Philosophy
+- **Build Fast**: Prioritize speed over perfection
+- **Validate Early**: Get user feedback as soon as possible
+- **Iterate Quickly**: Use feedback to guide next development phases
+- **Keep Simple**: Resist adding complexity until proven necessary
+
+## Post-MVP Planning
+- Use MVP feedback to prioritize features from main PRD
+- Consider user analytics to understand usage patterns
+- Plan for gradual feature rollout based on user needs
+- Design for scalability from MVP learnings
+</PRD> 

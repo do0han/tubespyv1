@@ -1,0 +1,213 @@
+{
+	"meta": {
+		"generatedAt": "2025-06-25T04:33:45.782Z",
+		"tasksAnalyzed": 25,
+		"totalTasks": 25,
+		"analysisCount": 25,
+		"thresholdScore": 6,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Setup Next.js 14 Project with TypeScript and TailwindCSS",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the setup of Next.js 14 project with TypeScript and TailwindCSS into specific configuration steps",
+			"reasoning": "Moderate complexity due to multiple technologies, but well-documented process"
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Implement Shadcn/ui Component Library",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Detail the steps to integrate and configure Shadcn/ui components in the Next.js project",
+			"reasoning": "Requires understanding of a new library and theme configuration"
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Design and Implement Database Schema with Prisma",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the process of designing and implementing the database schema using Prisma ORM",
+			"reasoning": "Complex due to schema design decisions and potential for future scalability issues"
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Implement NextAuth.js Authentication with Google OAuth",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Outline the steps to implement user authentication using NextAuth.js with Google OAuth",
+			"reasoning": "Involves security considerations and integration with external services"
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Integrate YouTube Data API v3",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Detail the process of integrating and utilizing the YouTube Data API v3",
+			"reasoning": "Requires careful API management, rate limiting, and error handling"
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Develop Basic Analytics Dashboard",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the development of the basic analytics dashboard into component-level tasks",
+			"reasoning": "Involves data visualization and responsive design considerations"
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Implement Channel Connection Flow",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Outline the steps to create a user flow for connecting and managing YouTube channels",
+			"reasoning": "Involves complex OAuth flow and user data management"
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Setup Zustand for Client-side State Management",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Detail the implementation of Zustand for state management in the application",
+			"reasoning": "Relatively straightforward but requires careful state design"
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Implement Real-time Updates with WebSockets",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the implementation of WebSocket connections for real-time updates",
+			"reasoning": "Involves complex server-client communication and state synchronization"
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Develop Error Handling and User Feedback System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Outline the development of a comprehensive error handling and user notification system",
+			"reasoning": "Requires careful consideration of various error scenarios and user experience"
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Integrate Google Gemini API for AI Analysis",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Detail the steps to integrate and utilize the Google Gemini API for content analysis",
+			"reasoning": "High complexity due to AI integration and prompt engineering requirements"
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Develop AI-Powered Content Optimization Interface",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the development of the AI-powered content optimization interface",
+			"reasoning": "Involves complex UI interactions and real-time AI processing"
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Implement Content Performance Prediction",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Outline the steps to develop and integrate a ML-based content performance prediction system",
+			"reasoning": "Highly complex due to ML model development and integration with existing systems"
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Develop Trending Topics and Keyword Analysis",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Detail the implementation of trending topics identification and keyword analysis features",
+			"reasoning": "Requires complex algorithms and data processing from multiple sources"
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Implement Competitor Tracking System",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the development of the competitor tracking system into specific features",
+			"reasoning": "Involves complex data collection and comparison algorithms"
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Develop Performance Comparison Tools",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Outline the development of tools for side-by-side performance metric comparisons",
+			"reasoning": "Requires advanced data visualization and complex calculations"
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Implement Market Opportunity Identification",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Detail the steps to develop a system for identifying market gaps and content opportunities",
+			"reasoning": "Highly complex due to advanced analytics and AI integration"
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Develop Advanced Filtering and Search Capabilities",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the implementation of advanced filtering and search functionality",
+			"reasoning": "Involves complex query optimization and UI considerations"
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Implement Multi-Channel Management",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Outline the development of multi-channel management functionality",
+			"reasoning": "Requires careful data management and UI design for multiple channels"
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Develop Team Collaboration Features",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Detail the implementation of role-based access control and team collaboration tools",
+			"reasoning": "Complex due to security considerations and multi-user data management"
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Implement Advanced Analytics and Reporting",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the development of comprehensive analytics and reporting features",
+			"reasoning": "Involves complex data processing and customizable reporting systems"
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Implement Caching with Redis",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Outline the steps to implement Redis caching for improved performance",
+			"reasoning": "Requires careful cache management and integration with existing systems"
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Implement Subscription Tiers and Payment Integration",
+			"complexityScore": 8,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Detail the development of subscription models and payment processing integration",
+			"reasoning": "Complex due to financial transactions and subscription management logic"
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Implement Performance Monitoring and Scaling",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down the implementation of performance monitoring and scaling strategies",
+			"reasoning": "Involves complex system architecture considerations and optimization"
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Develop White-Label Solutions for Agencies",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Outline the development of white-label functionality for agency clients",
+			"reasoning": "Highly complex due to multi-tenancy architecture and customization requirements"
+		}
+	]
+}
