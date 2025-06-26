@@ -26,6 +26,7 @@ model User {
   
   // Relations
   channels      Channel[]
+  videos        Video[]
   accounts      Account[]
   sessions      Session[]
   
@@ -35,7 +36,7 @@ model User {
 // Channel model for YouTube channel data
 model Channel {
   id              String    @id @default(cuid())
-  youtubeId       String    @unique @map("youtube_id")
+  youtubeId       String    @map("youtube_id")
   title           String
   description     String?
   thumbnailUrl    String?   @map("thumbnail_url")
@@ -61,13 +62,14 @@ model Channel {
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   videos          Video[]
   
+  @@unique([youtubeId, userId])
   @@map("channels")
 }
 
 // Video model for YouTube video data
 model Video {
   id              String    @id @default(cuid())
-  youtubeId       String    @unique @map("youtube_id")
+  youtubeId       String    @map("youtube_id")
   title           String
   description     String?
   thumbnailUrl    String?   @map("thumbnail_url")
@@ -95,7 +97,10 @@ model Video {
   // Relations
   channelId       String    @map("channel_id")
   channel         Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  @@unique([youtubeId, userId])
   @@map("videos")
 }
 

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { google } from 'googleapis';
+import { 
+  createSearchCacheKey, 
+  getCachedSearchResults, 
+  setCachedSearchResults 
+} from '@/lib/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,9 +19,25 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const maxResults = searchParams.get('maxResults') || '50';
+    const pageToken = searchParams.get('pageToken');
 
     if (!query) {
       return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
+    }
+
+    // 캐시 키 생성
+    const cacheKey = createSearchCacheKey(
+      query, 
+      'video', 
+      parseInt(maxResults), 
+      pageToken || undefined
+    );
+
+    // 캐시에서 결과 확인
+    const cachedResult = getCachedSearchResults(cacheKey);
+    if (cachedResult) {
+      console.log('📄 캐시된 결과 반환:', query);
+      return NextResponse.json(cachedResult);
     }
 
     // YouTube Data API v3 직접 호출
@@ -28,7 +49,7 @@ export async function GET(request: NextRequest) {
     console.log('🔍 YouTube API 검색 시작:', query);
 
     // 영상 검색
-    const searchResponse = await youtube.search.list({
+    const searchOptions: any = {
       part: ['snippet'],
       q: query,
       type: ['video'],
@@ -36,7 +57,14 @@ export async function GET(request: NextRequest) {
       order: 'relevance',
       regionCode: 'KR',
       relevanceLanguage: 'ko'
-    });
+    };
+    
+    // pageToken이 있으면 추가
+    if (pageToken && pageToken.trim() !== '') {
+      searchOptions.pageToken = pageToken;
+    }
+    
+    const searchResponse = await youtube.search.list(searchOptions);
 
     if (!searchResponse.data.items || searchResponse.data.items.length === 0) {
       console.log('⚠️ 검색 결과 없음');
@@ -167,11 +195,17 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ YouTube API 검색 완료: ${videos.length}개 결과`);
 
-    return NextResponse.json({ 
+    const result = { 
       videos,
       totalResults: searchResponse.data.pageInfo?.totalResults || 0,
+      nextPageToken: searchResponse.data.nextPageToken,
       query: query
-    });
+    };
+
+    // 결과를 캐시에 저장 (5분 TTL)
+    setCachedSearchResults(cacheKey, result, 5 * 60 * 1000);
+
+    return NextResponse.json(result);
 
   } catch (error: any) {
     console.error('❌ YouTube API 오류:', error);

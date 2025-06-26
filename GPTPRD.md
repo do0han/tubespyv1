@@ -202,3 +202,6 @@ CREATE POLICY "Users can access their analysis"
 ---
 
 **업데이트: 2025-06-25**
+
+
+다음 할일 필터 기능 수정 , 썸네일 클릭시 영상 재생 ,자막 클릭시 자막 내용 표시 ,등 기능 추가 

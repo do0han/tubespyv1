@@ -3,3 +3,91 @@ description:
 globs:
 alwaysApply: false
 ---
+# TubeSpy 개발 규칙
+
+## **더미 데이터 사용 금지**
+- **사용자가 명시적으로 요청하지 않는 한 더미(mock) 데이터를 사용하지 않음**
+- 실제 YouTube Data API v3를 통해 데이터를 가져와야 함
+- API 할당량 초과시에만 fallback으로 더미 데이터 사용
+
+```typescript
+// ✅ DO: 실제 YouTube API 호출
+const response = await fetch('/api/youtube/videos');
+const data = await response.json();
+
+// ❌ DON'T: 더미 데이터 하드코딩 (사용자 요청 없이)
+const dummyData = [
+  { title: 'Test Video', views: 1000 }
+];
+```
+
+## **성과도 등급 시스템**
+- **새로운 성과도 기준 사용**: 구독자 수 대비 조회수 비율
+- Good 이상: 조회수 ≥ 구독자수 × 2
+- Great!: 조회수 ≥ 구독자수 × 5
+
+```typescript
+// ✅ DO: 실제 데이터로 성과도 계산
+const getPerformanceGrade = (viewCount: number, subscriberCount: number) => {
+  const viewToSubRatio = viewCount / subscriberCount;
+  if (viewToSubRatio >= 5) return { grade: 'Great!', color: 'bg-green-500 text-white' };
+  if (viewToSubRatio >= 2) return { grade: 'Good', color: 'bg-green-200 text-green-800' };
+  // ...
+};
+```
+
+## **YouTube API 통합**
+- **NextAuth.js와 Google OAuth 2.0** 사용
+- YouTube Data API v3 scope: `https://www.googleapis.com/auth/youtube.readonly`
+- API 엔드포인트는 `/api/youtube/` 하위에 구성
+
+```typescript
+// ✅ DO: 적절한 에러 핸들링과 fallback
+try {
+  const videos = await fetchYouTubeVideos(searchQuery);
+  return NextResponse.json({ videos, usesFallback: false });
+} catch (error) {
+  console.warn('YouTube API 오류, 더미 데이터 사용:', error);
+  return NextResponse.json({ 
+    videos: generateDummyVideos(searchQuery), 
+    usesFallback: true 
+  });
+}
+```
+
+## **타입 안전성**
+- **모든 YouTube 데이터에 대한 TypeScript 인터페이스** 정의
+- Raw 숫자 데이터와 포맷된 문자열 데이터 구분
+
+```typescript
+// ✅ DO: 명확한 타입 정의
+interface YouTubeVideo {
+  id: string;
+  title: string;
+  viewCount: string;      // 포맷된 문자열 (예: "1,234,567")
+  rawViewCount: number;   // 실제 숫자 값
+  rawSubscriberCount: number;
+}
+```
+
+## **UI/UX 패턴**
+- **한국어 인터페이스** 사용
+- **색상 코딩된 성과도 배지** 사용
+- **정렬 가능한 테이블** 구조 유지
+
+```typescript
+// ✅ DO: 일관된 배지 스타일
+<span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${gradeData.color}`}>
+  {gradeData.grade}
+</span>
+```
+
+## **환경 설정**
+- **포트 3000 고정** 사용: `PORT=3000 npm run dev`
+- Google OAuth 리다이렉션 URI: `http://localhost:3000/api/auth/callback/google`
+- SQLite 데이터베이스 사용: `file:./prisma/dev.db`
+
+## **Git 워크플로우**
+- **TaskMaster AI**로 프로젝트 관리
+- 기능 완성시 커밋 메시지에 Task ID 포함
+- 환경 변수 파일 (.env.local) Git에서 제외
