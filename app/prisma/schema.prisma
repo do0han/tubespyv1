@@ -15,20 +15,23 @@ datasource db {
 
 // User model for authentication and user management
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
-  image         String?
-  googleId      String?   @unique @map("google_id")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String    @unique
+  emailVerified         DateTime? @map("email_verified")
+  image                 String?
+  googleId              String?   @unique @map("google_id")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  
+  // Data retention settings for automatic cleanup
+  dataRetentionSettings Json?     @map("data_retention_settings")
   
   // Relations
-  channels      Channel[]
-  videos        Video[]
-  accounts      Account[]
-  sessions      Session[]
+  channels              Channel[]
+  videos                Video[]
+  accounts              Account[]
+  sessions              Session[]
   
   @@map("users")
 }

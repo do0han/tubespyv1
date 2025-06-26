@@ -9,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import CleanupSettings from '@/components/CleanupSettings';
+import BackupRestore from '@/components/BackupRestore';
+import DataManagementDashboard from '@/components/DataManagementDashboard';
 import { 
   Trash2, 
   AlertTriangle, 
@@ -20,7 +23,10 @@ import {
   Eye,
   ThumbsUp,
   MessageCircle,
-  Users
+  Users,
+  Settings,
+  Archive,
+  BarChart3
 } from 'lucide-react';
 
 interface ChannelData {
@@ -264,8 +270,12 @@ export default function DataManagementPage() {
           </Alert>
         )}
 
-        <Tabs defaultValue="channels" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-400">
+        <Tabs defaultValue="dashboard" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 lg:w-1000">
+            <TabsTrigger value="dashboard">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              대시보드
+            </TabsTrigger>
             <TabsTrigger value="channels">
               <Database className="h-4 w-4 mr-2" />
               채널 관리 ({channels.length})
@@ -274,7 +284,20 @@ export default function DataManagementPage() {
               <Youtube className="h-4 w-4 mr-2" />
               비디오 관리 ({videos.length})
             </TabsTrigger>
+            <TabsTrigger value="cleanup">
+              <Settings className="h-4 w-4 mr-2" />
+              자동 정리 설정
+            </TabsTrigger>
+            <TabsTrigger value="backup">
+              <Archive className="h-4 w-4 mr-2" />
+              백업/복원
+            </TabsTrigger>
           </TabsList>
+
+          {/* 대시보드 탭 */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <DataManagementDashboard />
+          </TabsContent>
 
           {/* 채널 관리 탭 */}
           <TabsContent value="channels" className="space-y-6">
@@ -514,6 +537,16 @@ export default function DataManagementPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* 자동 정리 설정 탭 */}
+          <TabsContent value="cleanup" className="space-y-6">
+            <CleanupSettings />
+          </TabsContent>
+
+          {/* 백업/복원 탭 */}
+          <TabsContent value="backup" className="space-y-6">
+            <BackupRestore />
           </TabsContent>
         </Tabs>
       </div>
