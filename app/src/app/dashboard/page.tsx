@@ -331,6 +331,11 @@ export default function DashboardPage() {
     return { grade: 'Bad', color: 'bg-red-500 text-white' }; // 조회수가 구독자수의 절반 미만
   };
 
+  // YouTube 영상 URL 생성 함수
+  const getVideoUrl = (videoId: string) => {
+    return `https://www.youtube.com/watch?v=${videoId}`;
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -640,11 +645,35 @@ export default function DashboardPage() {
                             </td>
                             {/* 썸네일 */}
                             <td className="px-2 py-2 text-center border-r w-16">
-                              <img 
-                                src={video.thumbnails.medium.url} 
-                                alt="썸네일"
-                                className="w-12 h-8 object-cover rounded mx-auto cursor-pointer hover:scale-105 transition-transform"
-                              />
+                              <div 
+                                className="relative group cursor-pointer w-12 h-8 mx-auto"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const url = getVideoUrl(video.id);
+                                  console.log('🎬 썸네일 컨테이너 클릭됨!');
+                                  console.log('🔍 비디오 ID:', video.id);
+                                  console.log('🔗 URL:', url);
+                                  
+                                  try {
+                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                    console.log('✅ 썸네일: YouTube 영상 열기 시도함');
+                                  } catch (error) {
+                                    console.error('❌ 에러:', error);
+                                    alert('새 탭 열기에 실패했습니다.');
+                                  }
+                                }}
+                              >
+                                <img 
+                                  src={video.thumbnails.medium.url} 
+                                  alt="썸네일"
+                                  className="w-full h-full object-cover rounded hover:scale-105 transition-transform pointer-events-none"
+                                />
+                                {/* 호버 시 재생 버튼 표시 */}
+                                <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center pointer-events-none">
+                                  <Play className="h-3 w-3 text-white fill-white" />
+                                </div>
+                              </div>
                             </td>
                             {/* 채널명 */}
                             <td className="px-2 py-2 text-center text-xs text-gray-900 border-r min-w-[60px] max-w-[80px]">
@@ -652,7 +681,26 @@ export default function DashboardPage() {
                             </td>
                             {/* 제목 */}
                             <td className="px-2 py-2 text-left text-xs text-gray-900 border-r min-w-[100px] max-w-[120px]">
-                              <div className="line-clamp-2 leading-tight">{video.title}</div>
+                              <div 
+                                className="line-clamp-2 leading-tight cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const url = getVideoUrl(video.id);
+                                  console.log('📝 대시보드 제목 클릭됨 - ID:', video.id);
+                                  console.log('🔗 생성된 URL:', url);
+                                  
+                                  try {
+                                    window.open(url, '_blank', 'noopener,noreferrer');
+                                    console.log('✅ 제목 클릭: YouTube 영상 열기 시도함');
+                                  } catch (error) {
+                                    console.error('❌ 새 탭 열기 실패:', error);
+                                    alert('새 탭 열기에 실패했습니다.');
+                                  }
+                                }}
+                              >
+                                {video.title}
+                              </div>
                             </td>
                             {/* 게시일 */}
                             <td className="px-2 py-2 text-center text-xs text-gray-900 border-r min-w-[70px]">

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const channelId = searchParams.get('channelId');
     const limit = parseInt(searchParams.get('limit') || '20');
-    const sortBy = searchParams.get('sortBy') || 'publishedAt'; // publishedAt, viewCount, likeCount, commentCount
+    const sortBy = searchParams.get('sortBy') || 'publishedAt'; // publishedAt, viewCount, likeCount, commentCount, subscriberRatio
     const order = searchParams.get('order') || 'desc'; // asc, desc
 
     console.log(`📊 비디오 분석 데이터 조회: 사용자 ${session.user.id}`);
@@ -33,11 +33,13 @@ export async function GET(request: NextRequest) {
       whereCondition.channelId = channelId;
     }
 
-    // 정렬 조건 설정
-    const orderBy: any = {};
-    orderBy[sortBy] = order;
+    // 정렬 조건 설정 (구독자 대비 조회수 비율의 경우 특별 처리)
+    let orderBy: any = {};
+    if (sortBy !== 'subscriberRatio') {
+      orderBy[sortBy] = order;
+    }
 
-    // 비디오 데이터 조회
+    // 비디오 데이터 조회 (subscriberRatio 정렬의 경우 채널 정보도 포함)
     const videos = await prisma.video.findMany({
       where: whereCondition,
       include: {
@@ -46,12 +48,13 @@ export async function GET(request: NextRequest) {
             id: true,
             youtubeId: true,
             title: true,
-            thumbnailUrl: true
+            thumbnailUrl: true,
+            subscriberCount: true // 구독자 수 추가
           }
         }
       },
-      orderBy,
-      take: limit
+      orderBy: sortBy !== 'subscriberRatio' ? orderBy : undefined,
+      take: sortBy !== 'subscriberRatio' ? limit : undefined // subscriberRatio는 나중에 정렬 후 제한
     });
 
     if (videos.length === 0) {
@@ -84,13 +87,16 @@ export async function GET(request: NextRequest) {
       const uploadedDaysAgo = video.publishedAt ? 
         Math.floor((Date.now() - new Date(video.publishedAt).getTime()) / (1000 * 60 * 60 * 24)) : null;
 
-      // 성과 등급 계산 (조회수 기준)
+      // 구독자 대비 조회수 비율 계산
+      const subscriberRatio = video.channel.subscriberCount && video.channel.subscriberCount > 0 ? 
+        (video.viewCount || 0) / video.channel.subscriberCount : 0;
+
+      // 성과 등급 계산 (구독자 대비 조회수 비율 기준으로 개선)
       let performanceGrade = 'low';
-      if (video.viewCount) {
-        if (video.viewCount > 100000) performanceGrade = 'excellent';
-        else if (video.viewCount > 50000) performanceGrade = 'high';
-        else if (video.viewCount > 10000) performanceGrade = 'medium';
-      }
+      if (subscriberRatio >= 5) performanceGrade = 'excellent';  // 구독자 수의 5배 이상
+      else if (subscriberRatio >= 2) performanceGrade = 'high';  // 구독자 수의 2배 이상
+      else if (subscriberRatio >= 1) performanceGrade = 'medium'; // 구독자 수와 비슷
+      else if (subscriberRatio >= 0.5) performanceGrade = 'low';  // 구독자 수의 절반 이상
 
       return {
         id: video.id,
@@ -119,6 +125,7 @@ export async function GET(request: NextRequest) {
           engagementRate: parseFloat(engagementRate),
           uploadedDaysAgo,
           performanceGrade,
+          subscriberRatio: parseFloat(subscriberRatio.toFixed(4)), // 구독자 대비 조회수 비율 추가
           viewsPerDay: uploadedDaysAgo && uploadedDaysAgo > 0 ? 
             Math.round((video.viewCount || 0) / uploadedDaysAgo) : video.viewCount || 0,
           likesPerView: video.viewCount && video.viewCount > 0 ? 
@@ -137,11 +144,24 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // 구독자 대비 조회수 비율로 정렬 (필요한 경우)
+    let sortedVideos = processedVideos;
+    if (sortBy === 'subscriberRatio') {
+      sortedVideos = processedVideos.sort((a, b) => {
+        const ratioA = a.analytics.subscriberRatio;
+        const ratioB = b.analytics.subscriberRatio;
+        return order === 'desc' ? ratioB - ratioA : ratioA - ratioB;
+      });
+      
+      // 정렬 후 limit 적용
+      sortedVideos = sortedVideos.slice(0, limit);
+    }
+
     // 전체 분석 통계 계산
-    const totalVideos = processedVideos.length;
-    const totalViews = processedVideos.reduce((sum, video) => sum + video.viewCount, 0);
-    const totalLikes = processedVideos.reduce((sum, video) => sum + video.likeCount, 0);
-    const totalComments = processedVideos.reduce((sum, video) => sum + video.commentCount, 0);
+    const totalVideos = sortedVideos.length;
+    const totalViews = sortedVideos.reduce((sum, video) => sum + video.viewCount, 0);
+    const totalLikes = sortedVideos.reduce((sum, video) => sum + video.likeCount, 0);
+    const totalComments = sortedVideos.reduce((sum, video) => sum + video.commentCount, 0);
     
     const avgViews = totalVideos > 0 ? Math.round(totalViews / totalVideos) : 0;
     const avgLikes = totalVideos > 0 ? Math.round(totalLikes / totalVideos) : 0;
@@ -151,17 +171,17 @@ export async function GET(request: NextRequest) {
 
     // 성과별 비디오 개수
     const performanceStats = {
-      excellent: processedVideos.filter(v => v.analytics.performanceGrade === 'excellent').length,
-      high: processedVideos.filter(v => v.analytics.performanceGrade === 'high').length,
-      medium: processedVideos.filter(v => v.analytics.performanceGrade === 'medium').length,
-      low: processedVideos.filter(v => v.analytics.performanceGrade === 'low').length
+      excellent: sortedVideos.filter(v => v.analytics.performanceGrade === 'excellent').length,
+      high: sortedVideos.filter(v => v.analytics.performanceGrade === 'high').length,
+      medium: sortedVideos.filter(v => v.analytics.performanceGrade === 'medium').length,
+      low: sortedVideos.filter(v => v.analytics.performanceGrade === 'low').length
     };
 
     // 최근 업로드 추세 (최근 30일)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const recentVideos = processedVideos.filter(video => 
+    const recentVideos = sortedVideos.filter(video => 
       video.publishedAt && new Date(video.publishedAt) > thirtyDaysAgo
     );
 
@@ -170,7 +190,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        videos: processedVideos,
+        videos: sortedVideos,
         pagination: {
           total: totalVideos,
           limit,
@@ -200,7 +220,7 @@ export async function GET(request: NextRequest) {
           },
           
           // 상위 5개 비디오
-          topVideos: processedVideos
+          topVideos: sortedVideos
             .sort((a, b) => b.viewCount - a.viewCount)
             .slice(0, 5)
             .map(video => ({

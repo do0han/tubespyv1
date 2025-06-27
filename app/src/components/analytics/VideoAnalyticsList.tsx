@@ -36,6 +36,7 @@ interface VideoData {
     engagementRate: number;
     uploadedDaysAgo: number | null;
     performanceGrade: 'excellent' | 'high' | 'medium' | 'low';
+    subscriberRatio: number;
     viewsPerDay: number;
     likesPerView: string;
     commentsPerView: string;
@@ -134,6 +135,8 @@ const VideoAnalyticsList: React.FC<VideoAnalyticsListProps> = ({
     switch (sortBy) {
       case 'viewCount':
         return b.viewCount - a.viewCount;
+      case 'subscriberRatio':
+        return b.analytics.subscriberRatio - a.analytics.subscriberRatio;
       case 'likeCount':
         return b.likeCount - a.likeCount;
       case 'commentCount':
@@ -186,6 +189,7 @@ const VideoAnalyticsList: React.FC<VideoAnalyticsListProps> = ({
               <SelectContent>
                 <SelectItem value="publishedAt">업로드 날짜</SelectItem>
                 <SelectItem value="viewCount">조회수</SelectItem>
+                <SelectItem value="subscriberRatio">구독자 대비 조회수</SelectItem>
                 <SelectItem value="likeCount">좋아요</SelectItem>
                 <SelectItem value="commentCount">댓글</SelectItem>
                 <SelectItem value="engagementRate">참여율</SelectItem>
@@ -209,18 +213,45 @@ const VideoAnalyticsList: React.FC<VideoAnalyticsListProps> = ({
               >
                 {/* 썸네일 */}
                 <div className="flex-shrink-0">
-                  <div className="relative">
+                  <div 
+                    className="relative group cursor-pointer" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const url = getVideoUrl(video.youtubeId);
+                      console.log('🔍 분석 페이지 썸네일 클릭됨 - ID:', video.youtubeId);
+                      console.log('🔗 생성된 URL:', url);
+                      console.log('🌐 새 탭으로 열기 시도...');
+                      
+                                              try {
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                          console.log('✅ 분석 페이지 썸네일 클릭: YouTube 영상 열기 시도함');
+                        } catch (error) {
+                          console.error('❌ 새 탭 열기 실패:', error);
+                          alert('새 탭 열기에 실패했습니다.');
+                        }
+                    }}
+                  >
                     {video.thumbnailUrl ? (
                       <img
                         src={video.thumbnailUrl}
                         alt={video.title}
-                        className="w-full md:w-40 h-24 object-cover rounded"
+                        className="w-full md:w-40 h-24 object-cover rounded transition-transform group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full md:w-40 h-24 bg-gray-200 rounded flex items-center justify-center">
+                      <div className="w-full md:w-40 h-24 bg-gray-200 rounded flex items-center justify-center group-hover:bg-gray-300 transition-colors">
                         <span className="text-gray-500 text-xs">썸네일 없음</span>
                       </div>
                     )}
+                    
+                    {/* 재생 버튼 오버레이 */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-black bg-opacity-70 rounded-full p-2">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </div>
+                    </div>
                     
                     {video.duration && (
                       <span className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-1 py-0.5 rounded">
@@ -233,7 +264,24 @@ const VideoAnalyticsList: React.FC<VideoAnalyticsListProps> = ({
                 {/* 비디오 정보 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-medium text-gray-900 line-clamp-2 pr-2">
+                    <h3 
+                      className="text-lg font-medium text-gray-900 line-clamp-2 pr-2 cursor-pointer hover:text-blue-600 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const url = getVideoUrl(video.youtubeId);
+                        console.log('📝 분석 페이지 제목 클릭됨 - ID:', video.youtubeId);
+                        console.log('🔗 생성된 URL:', url);
+                        
+                        try {
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                          console.log('✅ 분석 페이지 제목 클릭: YouTube 영상 열기 시도함');
+                        } catch (error) {
+                          console.error('❌ 새 탭 열기 실패:', error);
+                          alert('새 탭 열기에 실패했습니다.');
+                        }
+                      }}
+                    >
                       {video.title}
                     </h3>
                     
@@ -284,6 +332,21 @@ const VideoAnalyticsList: React.FC<VideoAnalyticsListProps> = ({
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <TrendingUp className="h-4 w-4" />
                       <span>{video.analytics.engagementRate.toFixed(2)}%</span>
+                    </div>
+                  </div>
+                  
+                  {/* 구독자 대비 조회수 비율 */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">구독자 대비 조회수 비율:</span>
+                      <span className={`font-medium ${
+                        video.analytics.subscriberRatio >= 5 ? 'text-green-600' :
+                        video.analytics.subscriberRatio >= 2 ? 'text-blue-600' :
+                        video.analytics.subscriberRatio >= 1 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {video.analytics.subscriberRatio.toFixed(2)}x
+                      </span>
                     </div>
                   </div>
                   
