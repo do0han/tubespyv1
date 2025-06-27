@@ -11,7 +11,8 @@ import {
   Home,
   TrendingUp,
   Activity,
-  X
+  X,
+  Video
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,6 +32,12 @@ const navigation = [
     href: '/analytics',
     icon: BarChart3,
     description: '채널 및 영상 통계'
+  },
+  {
+    name: '비디오 분석',
+    href: '/dashboard/videos',
+    icon: Video,
+    description: '개별 영상 성과 분석'
   },
   {
     name: '데이터 관리',
