@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -62,8 +61,6 @@ interface VideoData {
 }
 
 export default function DataManagementPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [channels, setChannels] = useState<ChannelData[]>([]);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
@@ -73,15 +70,8 @@ export default function DataManagementPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      loadData();
-    }
-  }, [status, router]);
+    loadData();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -211,43 +201,27 @@ export default function DataManagementPage() {
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCcw className="h-8 w-8 animate-spin mx-auto text-blue-500" />
-          <p className="mt-2 text-gray-600">데이터를 불러오는 중...</p>
+      <DashboardLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCcw className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+            <p className="mt-2 text-gray-600">데이터를 불러오는 중...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <DashboardLayout>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 헤더 */}
         <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center space-x-4">
-            <Youtube className="h-8 w-8 text-red-500" />
+          <div>
             <h1 className="text-3xl font-bold text-gray-900">데이터 관리</h1>
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="bg-blue-50 border-blue-200 text-blue-700"
-              >
-                🔍 YouTube 검색
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/analytics')}
-                className="bg-green-50 border-green-200 text-green-700"
-              >
-                📊 데이터 분석
-              </Button>
-            </div>
+            <p className="text-gray-600 mt-2">저장된 YouTube 데이터를 관리하고 정리하세요</p>
           </div>
           
           <Button
@@ -550,6 +524,6 @@ export default function DataManagementPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </DashboardLayout>
   );
 } 

@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RefreshCcw, AlertCircle, Database, Youtube } from 'lucide-react';
@@ -77,8 +76,6 @@ interface VideoAnalytics {
 }
 
 const AnalyticsPage: React.FC = () => {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   
   const [channelsData, setChannelsData] = useState<ChannelAnalytics[]>([]);
   const [videosData, setVideosData] = useState<VideoAnalytics[]>([]);
@@ -148,87 +145,47 @@ const AnalyticsPage: React.FC = () => {
 
   // 초기 데이터 로드
   useEffect(() => {
-    if (status === 'loading') return;
-    
-    if (status === 'unauthenticated') {
-      router.push('/api/auth/signin');
-      return;
-    }
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        await Promise.all([
+          fetchChannelAnalytics(),
+          fetchVideoAnalytics()
+        ]);
+      } catch (error) {
+        console.error('❌ 초기 데이터 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (session?.user) {
-      const loadData = async () => {
-        setLoading(true);
-        setError(null);
-        
-        try {
-          await Promise.all([
-            fetchChannelAnalytics(),
-            fetchVideoAnalytics()
-          ]);
-        } catch (error) {
-          console.error('❌ 초기 데이터 로드 실패:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      loadData();
-    }
-  }, [session, status, router]);
+    loadData();
+  }, []);
 
   // 로딩 상태
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">분석 데이터를 불러오는 중...</p>
+      <DashboardLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">분석 데이터를 불러오는 중...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
-  // 인증되지 않은 상태
-  if (status === 'unauthenticated') {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 헤더 */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-          <div className="flex items-center space-x-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">분석 대시보드</h1>
-              <p className="text-gray-600 mt-2">저장된 YouTube 채널 및 비디오 데이터 분석</p>
-            </div>
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-                className="bg-blue-50 border-blue-200 text-blue-700"
-              >
-                🔍 YouTube 검색
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/analytics')}
-                className="bg-green-50 border-green-200 text-green-700"
-              >
-                📊 데이터 분석
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/data-management')}
-                className="bg-red-50 border-red-200 text-red-700"
-              >
-                🗑️ 데이터 관리
-              </Button>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">분석 대시보드</h1>
+            <p className="text-gray-600 mt-2">저장된 YouTube 채널 및 비디오 데이터 분석</p>
           </div>
           
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
@@ -341,7 +298,7 @@ const AnalyticsPage: React.FC = () => {
           </Tabs>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

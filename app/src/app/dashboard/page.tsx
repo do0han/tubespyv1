@@ -1,9 +1,8 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import DashboardLayout from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,8 +43,6 @@ type SortField = 'title' | 'channelTitle' | 'viewCount' | 'likeCount' | 'comment
 type SortDirection = 'asc' | 'desc';
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
   const [searchResults, setSearchResults] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -384,76 +381,8 @@ export default function DashboardPage() {
       <ChevronDown className="ml-1 h-4 w-4" />;
   };
 
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle>로그인이 필요합니다</CardTitle>
-            <CardDescription>YouTube 분석 도구에 접근하려면 로그인해주세요.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-full mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Youtube className="h-8 w-8 text-red-500" />
-              <h1 className="text-2xl font-bold text-gray-900">TubeSpy</h1>
-              <span className="text-sm text-gray-500">영상 분석 도구</span>
-              <div className="flex space-x-2 ml-8">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/dashboard')}
-                  className="bg-blue-50 border-blue-200 text-blue-700"
-                >
-                  🔍 YouTube 검색
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/analytics')}
-                  className="bg-green-50 border-green-200 text-green-700"
-                >
-                  📊 데이터 분석
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => router.push('/data-management')}
-                  className="bg-red-50 border-red-200 text-red-700"
-                >
-                  🗑️ 데이터 관리
-                </Button>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">반갑습니다, {session.user?.name}님</span>
-              <img 
-                src={session.user?.image || '/default-avatar.png'} 
-                alt="Profile" 
-                className="w-8 h-8 rounded-full"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <DashboardLayout>
       <div className="w-full px-4 py-6 pr-12">
         <div className="flex gap-12 max-w-none min-h-screen">
           {/* 새로운 필터 패널 - 폭 1.5배 증가 */}
@@ -810,6 +739,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 } 
