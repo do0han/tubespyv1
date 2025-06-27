@@ -210,18 +210,49 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('❌ YouTube API 오류:', error);
     
-    // API 할당량 초과나 인증 오류시 더미 데이터 반환
-    if (error.code === 403 || error.code === 401) {
+    // 에러 타입별 처리
+    if (error.code === 403 || error.message?.includes('quota')) {
       console.log('🔄 API 할당량 초과 - 더미 데이터 반환');
       return NextResponse.json({ 
-        error: 'API quota exceeded',
+        error: 'YouTube API quota exceeded',
+        code: 'QUOTA_EXCEEDED',
         usesFallback: true,
         videos: generateFallbackVideos(request.nextUrl.searchParams.get('q') || 'search')
       });
     }
+    
+    if (error.code === 401 || error.message?.includes('authentication')) {
+      return NextResponse.json({
+        error: 'Authentication failed',
+        code: 'AUTH_FAILED',
+        message: '인증에 실패했습니다. 다시 로그인해주세요.'
+      }, { status: 401 });
+    }
+    
+    if (error.code === 400 || error.message?.includes('Invalid')) {
+      return NextResponse.json({
+        error: 'Invalid request parameters',
+        code: 'INVALID_REQUEST',
+        message: '잘못된 요청입니다.'
+      }, { status: 400 });
+    }
+    
+    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+      return NextResponse.json({
+        error: 'Request timeout',
+        code: 'TIMEOUT',
+        message: '요청 시간이 초과되었습니다.'
+      }, { status: 408 });
+    }
 
+    // 기본 서버 오류
     return NextResponse.json(
-      { error: 'Failed to fetch videos', details: error.message },
+      { 
+        error: 'Internal server error',
+        code: 'INTERNAL_ERROR',
+        message: '서버 내부 오류가 발생했습니다.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }

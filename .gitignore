@@ -74,3 +74,9 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Environment variables
+
+# Task files
+# tasks.json
+# tasks/ 

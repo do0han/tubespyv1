@@ -11,6 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Youtube, BarChart3, TrendingUp, Users, Eye, Loader2, Search, Play, ThumbsUp, MessageCircle, Calendar, ArrowUpDown, ChevronUp, ChevronDown, Download, Star, Target, Filter, Settings, Database } from 'lucide-react';
 import SearchFilterPanel from '@/components/SearchFilterPanel';
+import { toast } from '@/components/ui/toast';
+import { LoadingSpinner, LoadingOverlay } from '@/components/ui/loading';
+import { showErrorToast, showSuccessToast, apiCall } from '@/lib/error-handler';
 
 // YouTube 영상 타입 정의
 interface YouTubeVideo {
@@ -172,6 +175,18 @@ export default function DashboardPage() {
       
     } catch (error: any) {
       console.error('❌ 검색 실패:', error);
+      
+      // 토스트로 에러 표시
+      if (error.message.includes('API quota exceeded') || error.message.includes('403')) {
+        showErrorToast('YouTube API 할당량이 초과되었습니다. 더미 데이터를 표시합니다.', 'API 제한');
+      } else if (error.message.includes('401')) {
+        showErrorToast('인증이 필요합니다. 다시 로그인해주세요.', '인증 오류');
+      } else if (error.message.includes('네트워크') || error.message.includes('fetch')) {
+        showErrorToast('네트워크 연결을 확인해주세요.', '연결 오류');
+      } else {
+        showErrorToast(`검색 실패: ${error.message}`, '검색 오류');
+      }
+      
       setError(`검색 실패: ${error.message}`);
       
       // 에러시 더미 데이터 생성

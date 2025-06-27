@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { VideoDetail } from '@/components/videos/VideoDetail';
 import { VideoMetrics } from '@/components/videos/VideoMetrics';
 import { VideoPerformanceChart } from '@/components/videos/VideoPerformanceChart';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import Link from 'next/link';
 
 interface VideoPageProps {
@@ -20,11 +21,13 @@ export default async function VideoPage({ params }: VideoPageProps) {
     redirect('/login');
   }
 
-  // 비디오 정보 가져오기
+  // 비디오 정보 가져오기 (사용자 검증 포함)
   const video = await prisma.video.findFirst({
     where: {
       id: params.id,
-      userId: session.user.id
+      channel: {
+        userId: session.user.id
+      }
     },
     include: {
       channel: {
@@ -89,45 +92,60 @@ export default async function VideoPage({ params }: VideoPageProps) {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+    <ErrorBoundary fallback={
+      <div className="p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">비디오 로딩 오류</h2>
+          <p className="text-gray-600 mb-4">비디오 정보를 불러오는 중 오류가 발생했습니다.</p>
           <Link 
             href="/dashboard/videos"
-            className="text-blue-600 hover:text-blue-800"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            ← 비디오 목록
+            비디오 목록으로 돌아가기
           </Link>
-          <h1 className="text-2xl font-bold">비디오 상세분석</h1>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <a
-            href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            YouTube에서 보기
-          </a>
         </div>
       </div>
+    }>
+      <div className="p-6 space-y-6">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link 
+              href="/dashboard/videos"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              ← 비디오 목록
+            </Link>
+            <h1 className="text-2xl font-bold">비디오 상세분석</h1>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <a
+              href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              YouTube에서 보기
+            </a>
+          </div>
+        </div>
 
-      {/* 비디오 기본 정보 */}
-      <VideoDetail video={video} />
+        {/* 비디오 기본 정보 */}
+        <VideoDetail video={video} />
 
-      {/* 성능 메트릭 */}
-      <VideoMetrics 
-        video={video} 
-        channelAverage={channelStats._avg}
-        similarPeriodAverage={similarPeriodStats?._avg}
-        channelVideoCount={channelStats._count.id}
-        similarPeriodCount={similarPeriodStats?._count.id || 0}
-      />
+        {/* 성능 메트릭 */}
+        <VideoMetrics 
+          video={video} 
+          channelAverage={channelStats._avg}
+          similarPeriodAverage={similarPeriodStats?._avg}
+          channelVideoCount={channelStats._count.id}
+          similarPeriodCount={similarPeriodStats?._count.id || 0}
+        />
 
-      {/* 성능 차트 */}
-      <VideoPerformanceChart video={video} channelAverage={channelStats._avg} />
-    </div>
+        {/* 성능 차트 */}
+        <VideoPerformanceChart video={video} channelAverage={channelStats._avg} />
+      </div>
+    </ErrorBoundary>
   );
 } 
