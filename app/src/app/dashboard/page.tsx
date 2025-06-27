@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/components/layout/dashboard-layout';
+import { LineChart, BarChart, AreaChart } from '@/components/charts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -737,6 +738,116 @@ export default function DashboardPage() {
               </Card>
             )}
           </div>
+
+          {/* 차트 데모 섹션 */}
+          {searchResults.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 데이터 시각화 데모</h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* 조회수 추이 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>조회수 추이</CardTitle>
+                    <CardDescription>최근 검색 결과의 조회수 분포</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <LineChart
+                      data={searchResults.slice(0, 10).map((video, index) => ({
+                        date: `영상 ${index + 1}`,
+                        value: parseInt(video.viewCount.replace(/,/g, '')) || 0
+                      }))}
+                      dataKey="value"
+                      xAxisKey="date"
+                      color="#3b82f6"
+                      height={250}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* 좋아요 막대 차트 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>좋아요 비교</CardTitle>
+                    <CardDescription>상위 영상들의 좋아요 수</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <BarChart
+                      data={searchResults.slice(0, 8).map((video, index) => ({
+                        name: `영상 ${index + 1}`,
+                        value: parseInt(video.likeCount?.replace(/,/g, '') || '0') || 0
+                      }))}
+                      dataKey="value"
+                      color="#10b981"
+                      height={250}
+                      layout="horizontal"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 영역 차트 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>누적 데이터</CardTitle>
+                    <CardDescription>누적 조회수 추이</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AreaChart
+                      data={searchResults.slice(0, 10).map((video, index) => {
+                        const cumulative = searchResults.slice(0, index + 1)
+                          .reduce((sum, v) => sum + (parseInt(v.viewCount.replace(/,/g, '')) || 0), 0);
+                        return {
+                          date: `영상 ${index + 1}`,
+                          value: cumulative
+                        };
+                      })}
+                      dataKey="value"
+                      color="#8b5cf6"
+                      height={250}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* 성능 지표 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>성능 지표</CardTitle>
+                    <CardDescription>조회수 대비 참여도</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-2">총 검색 결과</p>
+                        <p className="text-3xl font-bold text-blue-600">{searchResults.length}개</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <p className="text-sm text-gray-600">평균 조회수</p>
+                          <p className="text-xl font-semibold text-green-600">
+                            {searchResults.length > 0 ? 
+                              Math.round(searchResults.reduce((sum, video) => 
+                                sum + (parseInt(video.viewCount.replace(/,/g, '')) || 0), 0) / searchResults.length
+                              ).toLocaleString() : '0'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">최고 조회수</p>
+                          <p className="text-xl font-semibold text-purple-600">
+                            {searchResults.length > 0 ? 
+                              Math.max(...searchResults.map(video => 
+                                parseInt(video.viewCount.replace(/,/g, '')) || 0
+                              )).toLocaleString() : '0'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

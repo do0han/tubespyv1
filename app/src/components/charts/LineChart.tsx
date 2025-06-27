@@ -1,0 +1,108 @@
+'use client';
+
+import React from 'react';
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import { formatNumber } from '@/lib/chartUtils';
+
+interface LineChartProps {
+  data: any[];
+  dataKey: string;
+  xAxisKey?: string;
+  title?: string;
+  color?: string;
+  height?: number;
+  showGrid?: boolean;
+  showTooltip?: boolean;
+  showLegend?: boolean;
+  strokeWidth?: number;
+  formatValue?: (value: number) => string;
+  className?: string;
+}
+
+const LineChart: React.FC<LineChartProps> = ({
+  data,
+  dataKey,
+  xAxisKey = 'date',
+  title,
+  color = '#3b82f6',
+  height = 300,
+  showGrid = true,
+  showTooltip = true,
+  showLegend = false,
+  strokeWidth = 2,
+  formatValue = formatNumber,
+  className = '',
+}) => {
+  // 커스텀 툴팁 컴포넌트
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="text-sm font-medium text-gray-900">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: {formatValue(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className={`w-full ${className}`}>
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      )}
+      <ResponsiveContainer width="100%" height={height}>
+        <RechartsLineChart
+          data={data}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          {showGrid && (
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          )}
+          <XAxis
+            dataKey={xAxisKey}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 12, fill: '#64748b' }}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 12, fill: '#64748b' }}
+            tickFormatter={formatValue}
+          />
+          {showTooltip && <Tooltip content={<CustomTooltip />} />}
+          {showLegend && <Legend />}
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            dot={{ fill: color, strokeWidth: 0, r: 4 }}
+            activeDot={{ r: 6, stroke: color, strokeWidth: 2, fill: '#fff' }}
+          />
+        </RechartsLineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+export default LineChart; 
